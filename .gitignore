@@ -2,6 +2,9 @@
 __pycache__/
 *.py[codz]
 *$py.class
+inputs
+raw_inputs
+outputs
 
 # C extensions
 *.so

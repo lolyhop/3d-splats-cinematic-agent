@@ -1,5 +1,13 @@
 # 3D Splats Cinematic Agent Technical Report
 
+# Completed Tasks
+1. Render a video from inside the scene. (Theater.mp4 is attached)
+2. Detect objects in the rendered video. (Theater.mp4 contains several YOLO predictions)
+3. Path planning (both outdoor_drone.mp4 and Theater.mp4 are generated based on specific path building algorithms)
+4. Real-time scene preview (scene_preview.mp4 is attached)
+5. Rendered video that covers most of the scene/area (Theater.mp4 explores 7 pivot points that cover the most scene area)
+6. Render a 360° video (full view of the scene from multiple angles; this is not a true 360° video for platforms like YouTube)
+
 # Approach Overview
 
 To build a cinematic 3D Gaussian splats agent, I split the pipeline into several stages. Each stage solves one part of the problem, and together they allow the agent to fly through a scene and capture cinematic shots.
@@ -142,7 +150,7 @@ This results in a high-resolution path that the camera can follow smoothly durin
 
 ## 4. Object Detection
 
-For indoor scenes, we apply YOLO-based object detection to better understand the content of the environment. Outdoor scenes are not processed with YOLO because the pre-trained model often misclassifies common outdoor structures (e.g., labeling everything as “surfboard”).
+For indoor scenes, I applied YOLO-based object detection to better understand the content of the environment. Outdoor scenes are not processed with YOLO because the pre-trained model often misclassifies common outdoor structures (e.g., labeling everything as “surfboard”).
 
 ![Example: a detected bench in an indoor scene](imgs/detected_bench.png)
 
@@ -158,7 +166,7 @@ Camera orientation is handled differently depending on the scene type:
 
 I explored methods to make indoor flythroughs collision-aware. The idea was to prevent the camera from intersecting walls, furniture, and other splats.
 
-Approach attempted:
+### Approach attempted:
 
 **1. Voxel map construction:**
 
@@ -170,7 +178,15 @@ Starting from a central point (anchor) in the scene, a depth-first search (DFS) 
 
 **3. Collision checking and path repair:**
 
-After generating a preliminary trajectory, we checked each path point against the voxel map. Points inside occupied voxels were flagged, and attempts were made to re-route the path using breadth-first search (BFS) to navigate around obstacles.
+After generating a preliminary trajectory, I checked each path point against the voxel map. Points inside occupied voxels were flagged, and attempts were made to re-route the path using breadth-first search (BFS) to navigate around obstacles.
 
 **Outcome:**
 Despite these efforts, the method did not reliably produce collision-free trajectories. Path adjustments often caused unnatural detours. While the idea remains promising, a more robust approach is required.
+
+## Full Scene Rendering
+
+Currently, the system renders only the Gaussian splat point cloud, which limits the scene realism. Future work could involve exporting the computed camera trajectories and applying them in a more advanced rendering engine. This would allow producing high-quality cinematic sequences while still leveraging the automatically generated paths from the system.
+
+## Improved Path Planning via Learning
+
+Current path-building logic is heuristic and does not account for scene complexity. Future work could explore using a reinforcement learning (RL) agent to optimize camera trajectories. The agent’s objective could be to maximize the distance traveled along interesting regions while simultaneously minimizing collisions with dense areas or obstacles. This approach would produce smoother, safer, and more visually engaging flythroughs that adapt intelligently to different scene geometries.

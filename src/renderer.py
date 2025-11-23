@@ -1,6 +1,8 @@
+import argparse
 import numpy as np
 import open3d as o3d
 from plyfile import PlyData
+from collections import Counter
 
 
 class GaussianSplatScene:
@@ -92,5 +94,33 @@ class GaussianSplatScene:
 
 
 if __name__ == "__main__":
-    scene = GaussianSplatScene.from_ply("inputs/Museume.ply")
-    scene.visualize(camera_pos=np.array([0, 0, 2], dtype=np.float64))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--scene_path", type=str, required=True, help="Path to the .ply scene"
+    )
+    args = parser.parse_args()
+
+    scene = GaussianSplatScene.from_ply(args.scene_path)
+
+    # Remove the scene noise
+    voxel_size = 0.8
+    positions = scene.positions
+    density_threshold = 10
+    coords = np.floor(positions / voxel_size).astype(int)
+    counts = Counter(map(tuple, coords))
+    keep_mask = np.array([counts[tuple(c)] >= density_threshold for c in coords])
+
+    scene = GaussianSplatScene(
+        positions=positions[keep_mask],
+        scales=scene.scales[keep_mask],
+        rotations=scene.rotations[keep_mask],
+        colors=scene.colors[keep_mask],
+        opacity=scene.opacity[keep_mask],
+    )
+
+    # Open previewer
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(scene.positions)
+    pcd.colors = o3d.utility.Vector3dVector(scene.colors.astype(np.float32) / 255.0)
+
+    o3d.visualization.draw([pcd])

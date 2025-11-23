@@ -22,24 +22,24 @@ class SceneClassifierCluster:
     @staticmethod
     def classify(
         scene: GaussianSplatScene,
-        voxel_size: float = 1.0,
+        voxel_size: float = 0.7,
         max_points: int = 50000,
-        eps: float = 5.0,
+        eps: float = 3.0,
         min_samples: int = 50,
     ):
         positions = scene.positions.astype(np.float32)
 
-        # --- Downsample to reduce points ---
+        # Downsample to reduce points
         positions = SceneClassifierCluster._voxel_downsample(positions, voxel_size)
         positions = SceneClassifierCluster._subsample_points(positions, max_points)
 
-        # --- DBSCAN clustering ---
+        # DBSCAN clustering
         clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(positions)
         labels = clustering.labels_
         n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
-        # --- Heuristic classification based on number of clusters ---
-        if n_clusters < 4:
+        # Classification based on number of clusters ---
+        if n_clusters < 3:
             scene_type = "indoor"
         else:
             scene_type = "outdoor"

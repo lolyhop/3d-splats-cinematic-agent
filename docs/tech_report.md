@@ -4,7 +4,7 @@
 1. Render a video from inside the scene. (Theater.mp4 is attached)
 2. Detect objects in the rendered video. (Theater.mp4 contains several YOLO predictions)
 3. Path planning (both outdoor_drone.mp4 and Theater.mp4 are generated based on specific path building algorithms)
-4. Real-time scene preview (scene_preview.mp4 is attached)
+4. Real-time scene preview (scene_preview.mov is attached)
 5. Rendered video that covers most of the scene/area (Theater.mp4 explores 7 pivot points that cover the most scene area)
 6. Render a 360° video (full view of the scene from multiple angles; this is not a true 360° video for platforms like YouTube)
 

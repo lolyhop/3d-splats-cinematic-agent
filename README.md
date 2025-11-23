@@ -55,6 +55,10 @@ cd 3d-splats-cinematic-agent
 pip install -r requirements.txt
 ```
 
+### 3. Download a Gaussian Splat Scene
+
+You can download sample Gaussian Splat scenes from [Superspl.at](https://superspl.at). These files can be used directly with the 3D Splats Cinematic Agent for preview, path planning, and video generation.
+
 ## Usage Guide
 
 ### Scene Preview

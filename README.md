@@ -68,3 +68,21 @@ python -m src.renderer --scene_path <path_to_scene>
 ```sh
 python src.main --scene_path <path_to_scene>
 ```
+
+## Algorithms Overview
+For a detailed technical explanation of the algorithms and pipeline, see the [Technical Report](https://github.com/lolyhop/3d-splats-cinematic-agent/blob/main/docs/tech_report.md).
+
+## Limitations
+- Scene preview may lag on large point clouds;
+- Indoor trajectories can occasionally skip or teleport between pivot points;
+- Currently, rendering is limited to point clouds only; full scene geometry and textures are not supported.
+
+Future work can be found [here](https://github.com/lolyhop/3d-splats-cinematic-agent/blob/main/docs/tech_report.md).
+
+## Tech Stack
+- NumPy 2.3.5 — numerical computations and array manipulations;
+- Open3D 0.19.0 — 3D point cloud processing, visualization, and geometry operations;
+- OpenCV 4.12.0.88 — image processing, video rendering, and visualization;
+- Plyfile 1.1.3 — reading and writing PLY files;
+- scikit-learn 1.7.2 — ML algorithms for clustering and path planning;
+- Ultralytics YOLO 8.3.221 — object detection on rendered frames.

@@ -83,12 +83,94 @@ These pivot points are then passed to the next stage, where the agent builds a s
 
 ## 3. Build a Path Across Selected Points
 
-TODO
+Once the pivot points are selected, the next stage is to generate a continuous and cinematic camera trajectory. The exact strategy depends on whether the scene is indoor or outdoor. 
+
+### Outdoor Path Generation
+
+Outdoor scenes typically provide a single dominant pivot point that acts as the visual anchor of the environment. Instead of simply circling around it on a fixed radius, the camera performs a multi-stage motion sequence that resembles a drone shot. 
+
+The path is constructed as a sequence of 3D points in space and consists of three conceptual stages:
+
+**1. Expanding Spiral:**
+The camera starts near the pivot and gradually moves outward while ascending. The radius increases linearly, the height changes smoothly, and the angle rotates around the pivot multiple times. This provides an establishing shot of the scene from a dynamic perspective.
+
+```python
+# Expanding spiral
+spiral_points = []
+for i in range(total_points):
+    t = i / total_points
+    radius = start_radius * (1 - t) + end_radius * t
+    height = start_height * (1 - t) + end_height * t
+    angle = 2 * np.pi * turns * t
+    x = pivot[0] + radius * np.cos(angle)
+    y = pivot[1] + radius * np.sin(angle)
+    z = pivot[2] + height
+    spiral_points.append([x, y, z])
+```
+
+**2. Smooth Approach:**
+After the spiral, the camera transitions toward the pivot along a smooth Bézier curve. An ease-in/ease-out function modulates the motion to avoid abrupt accelerations, and small oscillations can be added to make the movement feel more natural.
+
+```python
+# Quadratic Bézier curve: B(t) = (1-t)^2*P0 + 2*(1-t)*t*P1 + t^2*P2
+P0 = spiral_points[-1]
+P2 = pivot + np.array([0, 0, height_offset])
+P1 = P0 + (P2 - P0) * 0.5 + np.array([1.0, 0.5, 0.0])  # control point offset
+approach_points = []
+for i in range(approach_steps):
+    t = i / approach_steps
+    t_eased = t**2 * (3 - 2*t)  # ease-in/ease-out
+    point = (1 - t_eased)**2 * P0 + 2*(1 - t_eased)*t_eased * P1 + t_eased**2 * P2
+    point += np.array([np.sin(t_eased * 6*np.pi) * 0.5, 0, 0])  # small oscillation
+    approach_points.append(point)
+```
+
+**3. Final Close Orbit:**
+Once near the pivot, the camera performs a series of tight circular orbits at gradually decreasing radii.
+
+### Indoor Path Generation
+
+For indoor scenes, multiple pivot points are selected using K-Means algorithm. The goal is to generate a trajectory that moves smoothly between these points, avoiding collisions with walls or dense areas.
+
+**Connecting Points**
+
+After obtaining the pivot points, a Catmull-Rom spline is used to generate a smooth trajectory passing through them.
+
+For each pair of consecutive pivots, the spline interpolates points using the two neighboring pivots on each side, producing a continuous path with no sharp turns. The segment between pivots is divided into a fixed number of points, ensuring uniform spacing along the trajectory. 
+
+This results in a high-resolution path that the camera can follow smoothly during the indoor flythrough.
 
 ## 4. Object Detection
 
-TODO
+For indoor scenes, we apply YOLO-based object detection to better understand the content of the environment. Outdoor scenes are not processed with YOLO because the pre-trained model often misclassifies common outdoor structures (e.g., labeling everything as “surfboard”).
+
+![Example: a detected bench in an indoor scene](imgs/detected_bench.png)
 
 ## 5. Camera Movement
 
-TODO
+Camera orientation is handled differently depending on the scene type:
+- **Outdoor scenes:** The camera always looks toward the pivot point;
+- **Indoor scenes:** The camera is oriented along the forward tangent of the path, essentially looking at the next pivot point in the trajectory.
+
+# Future work
+
+## Collision-Aware Path Planning
+
+I explored methods to make indoor flythroughs collision-aware. The idea was to prevent the camera from intersecting walls, furniture, and other splats.
+
+Approach attempted:
+
+**1. Voxel map construction:**
+
+The scene was voxelized, with each voxel marked as occupied if the local point density exceeded a threshold. This produced a 3D occupancy grid highlighting areas the camera should avoid.
+
+**2. Anchor-based DFS exploration:**
+
+Starting from a central point (anchor) in the scene, a depth-first search (DFS) was used to explore free voxels and propose candidate camera positions along the path.
+
+**3. Collision checking and path repair:**
+
+After generating a preliminary trajectory, we checked each path point against the voxel map. Points inside occupied voxels were flagged, and attempts were made to re-route the path using breadth-first search (BFS) to navigate around obstacles.
+
+**Outcome:**
+Despite these efforts, the method did not reliably produce collision-free trajectories. Path adjustments often caused unnatural detours. While the idea remains promising, a more robust approach is required.

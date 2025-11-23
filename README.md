@@ -20,8 +20,6 @@
 ## Introduction
 This project provides a set of tools for working with Gaussian Splat scenes. It supports scene preview, camera path generation, object detection, and basic path planning. The goal is to offer practical utilities for analysis and video creation without relying on heavy 3D software.
 
----
-
 ## Features
 
 ### 🔍 Scene Preview
@@ -43,12 +41,11 @@ This project provides a set of tools for working with Gaussian Splat scenes. It 
 - Simple ML-based approaches (e.g., k-means) for deriving camera routes;
 - Can generate trajectories based on scene structure.
 
-
 ## How to Launch
 
 ### 1. Clone
 ```sh
-git clone https://github.com/your-user/3d-splats-cinematic-agent
+git clone https://github.com/lolyhop/3d-splats-cinematic-agent
 cd 3d-splats-cinematic-agent
 ```
 
@@ -58,10 +55,7 @@ cd 3d-splats-cinematic-agent
 pip install -r requirements.txt
 ```
 
-
-⸻
-
-## Usage Guide (with examples)
+## Usage Guide
 
 ### Scene Preview
 
@@ -74,4 +68,3 @@ python -m src.renderer --scene_path <path_to_scene>
 ```sh
 python src.main --scene_path <path_to_scene>
 ```
-

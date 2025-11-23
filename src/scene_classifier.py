@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.cluster import DBSCAN
-from src.renderer import GaussianSplatScene
 
 
 class SceneClassifierCluster:
@@ -21,7 +20,7 @@ class SceneClassifierCluster:
 
     @staticmethod
     def classify(
-        scene: GaussianSplatScene,
+        scene,
         voxel_size: float = 0.7,
         max_points: int = 50000,
         eps: float = 3.0,
@@ -46,17 +45,3 @@ class SceneClassifierCluster:
 
         return scene_type, n_clusters
 
-
-if __name__ == "__main__":
-    scene_files = [
-        "inputs/ConferenceHall.ply",
-        "inputs/Museume.ply",
-        "inputs/Theater.ply",
-        "inputs/outdoor-drone.ply",
-        "inputs/outdoor-street.ply",
-    ]
-
-    for file in scene_files:
-        scene = GaussianSplatScene.from_ply(file)
-        scene_type, n_clusters = SceneClassifierCluster.classify(scene)
-        print(f"{file.split('/')[-1]} → {scene_type.upper()}, clusters = {n_clusters}")
